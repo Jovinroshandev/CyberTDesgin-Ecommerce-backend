@@ -28,29 +28,10 @@ if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
 
 // middleware
 app.use(express.json());
-app.use(cors())
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://cyber-t-desgin-ecommerce-front.vercel.app"
-];Add commentMore actions
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true
-}));
+app.use(cors());
 
 // Connect MongoDB
-connectDB().then(() => {
-    createAdminUser();
-});
+connectDB().then(() => createAdminUser());
 
 async function createAdminUser() {
     try {
