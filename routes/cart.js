@@ -7,15 +7,16 @@ const StockManage = require("../models/stockmanagement"); // Import Stock model
 // Add to Cart
 // ----------------------------
 router.post("/addtocart", async (req, res) => {
-    const { UserId, productId } = req.body;
+    const { UserId, productId, orderStatus } = req.body;
     const quantity = 1
     let cart = await Cart.findOne({ UserId });
     if (!cart) {
         // Create new cart
         cart = new Cart({
-            UserId,
-            Items: [{ productId, quantity }]
-        });
+    UserId,
+    Items: [{ productId, quantity, orderStatus: false }]
+});
+
     } else {
         const item = cart.Items.find(i => i.productId === productId);
         if (item) {
@@ -32,7 +33,7 @@ router.post("/addtocart", async (req, res) => {
 // ----------------------------
 // Increase Quantity
 // ----------------------------
-router.post("/add", async (req, res) => {
+router.post("/increase", async (req, res) => {
     const { UserId, productId, quantity } = req.body;
     let cart = await Cart.findOne({ UserId });
     const item = cart.Items.find(i => i.productId === productId);
@@ -103,7 +104,7 @@ router.get("/:UserId/quantity", async (req, res) => {
 // ----------------------------
 // Update Quantity
 // ----------------------------
-router.put("/descrease-cart", async (req, res) => {
+router.put("/decrease-cart", async (req, res) => {
     const { UserId, productId } = req.body;
     const cart = await Cart.findOne({ UserId });
     if (!cart) return res.send({ message: "Cart not found!" });
@@ -132,5 +133,30 @@ router.delete("/remove", async (req, res) => {
 
     res.send(cart);
 });
+
+
+
+// ============================================
+// Clear Cart
+// ============================================
+router.put('/clear-cart', async (req, res) => {
+    const { UserId } = req.body;
+
+    try {
+        const cart = await Cart.findOne({ UserId });
+        if (!cart) {
+            return res.status(404).json({ message: "Cart not found!" });
+        }
+
+        cart.Items = []; // Clear all cart items
+        await cart.save();
+
+        res.status(200).json({ message: "Cart cleared after order placed" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to clear cart" });
+    }
+});
+
 
 module.exports = router;
